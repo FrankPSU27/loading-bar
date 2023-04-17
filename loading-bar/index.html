@@ -23,6 +23,42 @@
   <loading-bar></loading-bar>
 
   <script type="module" src="./src/loading-bar.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      const progressBars = document.querySelectorAll('.progress');
+      const timers = document.querySelectorAll('.timer');
+      const progressTimes = [3790, 31250, 42610];
+
+      for (let i = 0; i < progressBars.length; i++) {
+        const progressBar = progressBars[i];
+        const timer = timers[i];
+        const progressTime = progressTimes[i];
+
+        setTimeout(() => {
+          progressBar.style.animationPlayState = 'paused';
+        }, progressTime);
+
+        let startTime = Date.now();
+
+        function updateTime(elapsedTime, timerElement) {
+          const seconds = Math.floor(elapsedTime / 1000);
+          const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+          timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
+        }
+
+        function updateTimer() {
+          let elapsedTime = Date.now() - startTime;
+          if (elapsedTime >= progressTime) {
+            elapsedTime = progressTime;
+            clearInterval(timerInterval);
+          }
+          updateTime(elapsedTime, timer);
+        }
+
+        const timerInterval = setInterval(updateTimer, 10);
+      }
+    });
+  </script>
 </body>
 
 </html>

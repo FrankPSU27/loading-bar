@@ -1,7 +1,5 @@
 import { LitElement, html, css } from 'lit';
 
-const logo = new URL('../assets/open-wc-logo.svg', import.meta.url).href;
-
 class LoadingBar extends LitElement {
   static properties = {
     header: { type: String },
@@ -9,44 +7,77 @@ class LoadingBar extends LitElement {
 
   static styles = css`
     :host {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      font-size: calc(10px + 2vmin);
-      color: #1a2b42;
-      max-width: 960px;
-      margin: 0 auto;
+      display: block;
+    }
+    .title{
       text-align: center;
-      background-color: var(--loading-bar-background-color);
+}
+.box {
+			border: 1px solid black;
+			padding: 20px;
+			margin: 20px;
+			max-width: 800px;
+			background-color: #fff;
+			color: #000;
+			font-family: Arial, sans-serif;
+      margin-left: auto;
+      margin-right: auto;
+		}
+		
+		.list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+		
+		.list li {
+			margin-bottom: 10px;
+			font-size: 16px;
+		}
+		
+		.heading {
+			font-family: Arial, sans-serif;
+			font-size: 24px;
+			margin-bottom: 10px;
+		}
+
+    .loading-bar {
+      height: 30px;
+      background-color: #ddd;
+      border: 3px solid #000;
+      border-radius: 5px;
+      padding: 5px;
+      position: relative;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 10px;
     }
 
-    main {
-      flex-grow: 1;
+    .progress {
+      height: 100%;
+      background-color: #4CAF50;
+      width: 0;
+      animation: progress 60s linear forwards;
+      border-radius: 5px;
+      background: linear-gradient(to right, yellow, orange);
     }
 
-    .logo {
-      margin-top: 36px;
-      animation: app-logo-spin infinite 20s linear;
+    .timer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 14px;
+      padding: 5px;
     }
 
-    @keyframes app-logo-spin {
-      from {
-        transform: rotate(0deg);
+    @keyframes progress {
+      0% {
+        width: 0;
       }
-      to {
-        transform: rotate(360deg);
+      100% {
+        width: 100%;
       }
-    }
-
-    .app-footer {
-      font-size: calc(12px + 0.5vmin);
-      align-items: center;
-    }
-
-    .app-footer a {
-      margin-left: 5px;
     }
   `;
 
@@ -58,30 +89,71 @@ class LoadingBar extends LitElement {
   render() {
     return html`
       <main>
-        <div class="logo"><img alt="open-wc logo" src=${logo} /></div>
-        <h1>${this.header}</h1>
-
-        <p>Edit <code>src/LoadingBar.js</code> and save to reload.</p>
-        <a
-          class="app-link"
-          href="https://open-wc.org/guides/developing-components/code-examples/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Code examples
-        </a>
+      <h1 class="title">Loading Bar</h1>
+<div class="box">
+		<div class="heading">This Project is to demonstrate the following:</div>
+		<ul class="list">
+			<li>Endpoint that returns the list of data (could be vercel or just a static json file)</li>
+			<li>Map through it and display the results (list element)</li>
+			<li>Research how to do an animation to fill the container based on time involved. Count up from this.start to the time in question to display how long something takes. Start defaults to 0 but should be able to do any starting point.</li>
+			<li>Time mode but also a basic "count to X in Y seconds" for things like "we've got 12,000 sites vs the other guy only has 125"</li>
+			<li>Color option per product to fade from 1 color to the other. This should be CSS variable driven but backgrounds do support gradients / fading</li>
+			<li>Tag for bar, for row, for app talking to the endpoint</li>
+			<li>Alt / title type of accessibility area to indicate to non-sighted user what's going on here. "A bar graph animation showing how long it takes for X to be installed" or some kind of equivalent statement</li>
+			<li>Only start loading when visible (need to use intersection observers to ensure that it's visible when someone gets to it)</li>
+			<li>Accessibility enhancement -- if user has Prefers reduced motion, still only load when visible but jump from 0 to 50% to 100% -- https://web.dev/prefers-reduced-motion/</li>
+			<li>Mobile support that's scaled down / responses well</li>
+		</ul>
+	</div>
+        <div class="loading-bar">
+          <div class="progress"></div>
+          <div class="timer">0s</div>
+        </div>
+        <div class="loading-bar">
+          <div class="progress"></div>
+          <div class="timer">0s</div>
+        </div>
+        <div class="loading-bar">
+          <div class="progress"></div>
+          <div class="timer">0s</div>
+        </div>
       </main>
-
-      <p class="app-footer">
-        🚽 Made with love by
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://github.com/open-wc"
-          >open-wc</a
-        >.
-      </p>
     `;
+  }
+
+  firstUpdated() {
+    const progressBars = this.shadowRoot.querySelectorAll('.progress');
+    const timers = this.shadowRoot.querySelectorAll('.timer');
+    const progressTimes = [3790, 31250, 42610];
+
+    for (let i = 0; i < progressBars.length; i++) {
+      const progressBar = progressBars[i];
+      const timer = timers[i];
+      const progressTime = progressTimes[i];
+
+      setTimeout(() => {
+        progressBar.style.animationPlayState = 'paused';
+      }, progressTime);
+
+      let startTime = Date.now();
+
+      function updateTime(elapsedTime, timerElement) {
+        const seconds = Math.floor(elapsedTime / 1000);
+        const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+        timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
+      }
+
+      function updateTimer() {
+        let elapsedTime = Date.now() - startTime;
+        if (elapsedTime >= progressTime) {
+          elapsedTime = progressTime;
+          clearInterval(timerInterval);
+        }
+        updateTime(elapsedTime, timer);
+      }
+
+      const timerInterval = setInterval(updateTimer, 10);
+    }
   }
 }
 
