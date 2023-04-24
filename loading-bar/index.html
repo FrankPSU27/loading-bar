@@ -26,38 +26,78 @@
   <script>
     window.addEventListener('load', () => {
       const progressBars = document.querySelectorAll('.progress');
-      const timers = document.querySelectorAll('.timer');
-      const progressTimes = [3790, 31250, 42610];
+const timers = document.querySelectorAll('.timer');
+const progressTimes = [37900, 54250, 100000];
 
-      for (let i = 0; i < progressBars.length; i++) {
-        const progressBar = progressBars[i];
-        const timer = timers[i];
-        const progressTime = progressTimes[i];
+function updateTime(elapsedTime, timerElement) {
+  const seconds = Math.floor(elapsedTime / 1000);
+  const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+  timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
+}
 
-        setTimeout(() => {
-          progressBar.style.animationPlayState = 'paused';
-        }, progressTime);
+function updateTimer(progressBar, timer, progressTime) {
+  let startTime = Date.now();
+  let elapsedTime = 0;
+  let timerInterval;
 
-        let startTime = Date.now();
 
-        function updateTime(elapsedTime, timerElement) {
-          const seconds = Math.floor(elapsedTime / 1000);
-          const milliseconds = Math.floor((elapsedTime % 1000) / 10);
-          timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
-        }
+  function step() {
+    const currentTime = Date.now();
+    elapsedTime = currentTime - startTime;
 
-        function updateTimer() {
-          let elapsedTime = Date.now() - startTime;
-          if (elapsedTime >= progressTime) {
-            elapsedTime = progressTime;
-            clearInterval(timerInterval);
-          }
-          updateTime(elapsedTime, timer);
-        }
+    if (elapsedTime >= progressTime) {
+      elapsedTime = progressTime;
+      clearInterval(timerInterval);
+    }
 
-        const timerInterval = setInterval(updateTimer, 10);
+    updateTime(elapsedTime, timer);
+    const percentage = elapsedTime / progressTime * 100;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Reduce motion is enabled
+      if (percentage >= 50) {
+        progressBar.style.width = '50%';
       }
+      if (percentage >= 100) {
+        progressBar.style.width = '100%';
+      }
+    } else {
+      // Reduce motion is disabled
+      progressBar.style.width = percentage + '%';
+    }
+  }
+
+  timerInterval = setInterval(step, 10);
+}
+
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.1,
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      const progressBar = entry.target.querySelector('.progress');
+      const timer = entry.target.querySelector('.timer');
+      const progressTime = progressTimes[Array.from(progressBars).indexOf(progressBar)];
+      
+      setTimeout(() => {
+        progressBar.style.animationPlayState = 'paused';
+      }, progressTime);
+
+      updateTimer(progressBar, timer, progressTime);
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+progressBars.forEach((progressBar) => {
+  observer.observe(progressBar.parentNode);
+});
     });
+
   </script>
 </body>
 
