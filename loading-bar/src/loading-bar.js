@@ -286,7 +286,7 @@ function updateTimer(progressBar, timer, progressTime) {
     const percentage = elapsedTime / progressTime * 100;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Reduce motion is enabled
+      
       if (percentage >= 50) {
         progressBar.style.width = '50%';
       }
