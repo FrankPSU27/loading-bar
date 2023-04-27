@@ -173,7 +173,7 @@ class LoadingBar extends LitElement {
       const timerValue = this.formatTime(timeLeft);
       this.timerDisplay.textContent = timerValue;
 
-      // update progress
+      // update progrogess
       const progress = Math.round((timePassed / this.duration) * 100);
       this.progressBar.style.width = `${progress}%`;
 
