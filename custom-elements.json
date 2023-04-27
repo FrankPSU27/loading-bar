@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/loading-bar.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "LoadingBar",
+          "members": [
+            {
+              "kind": "method",
+              "name": "startTimer"
+            },
+            {
+              "kind": "method",
+              "name": "stopTimer"
+            },
+            {
+              "kind": "method",
+              "name": "formatTime",
+              "parameters": [
+                {
+                  "name": "milliseconds"
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "header",
+              "type": {
+                "text": "string"
+              },
+              "default": "'My app'",
+              "privacy": "public",
+              "attribute": "header"
+            },
+            {
+              "kind": "field",
+              "name": "startTime",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "privacy": "public",
+              "attribute": "startTime"
+            },
+            {
+              "kind": "field",
+              "name": "duration",
+              "type": {
+                "text": "number"
+              },
+              "default": "10000",
+              "privacy": "public",
+              "attribute": "duration"
+            },
+            {
+              "kind": "field",
+              "name": "timerDisplay",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "progressBar",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "timerInterval",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "progress",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "progressWidth",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "timerValue",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "header",
+              "fieldName": "header"
+            },
+            {
+              "name": "duration",
+              "fieldName": "duration"
+            },
+            {
+              "name": "startTime",
+              "fieldName": "startTime"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "loading-bar",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "loading-bar",
+          "declaration": {
+            "name": "LoadingBar",
+            "module": "src/loading-bar.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "stories/loading-bar.stories.js",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "App"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "stories/loading-bar.stories.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "App",
+          "declaration": {
+            "name": "App",
+            "module": "stories/loading-bar.stories.js"
+          }
+        }
+      ]
+    }
+  ]
+}
