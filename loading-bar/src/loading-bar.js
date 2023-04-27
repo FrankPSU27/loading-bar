@@ -216,6 +216,21 @@ class LoadingBar extends LitElement {
 			<li>Mobile support that's scaled down / responses well</li>
 		</ul>
 	</div>
+  <div class="box">
+		<div class="heading">This Project is to demonstrate the following:</div>
+		<ul class="list">
+			<li>Endpoint that returns the list of data (could be vercel or just a static json file)</li>
+			<li>Map through it and display the results (list element)</li>
+			<li>Research how to do an animation to fill the container based on time involved. Count up from this.start to the time in question to display how long something takes. Start defaults to 0 but should be able to do any starting point.</li>
+			<li>Time mode but also a basic "count to X in Y seconds" for things like "we've got 12,000 sites vs the other guy only has 125"</li>
+			<li>Color option per product to fade from 1 color to the other. This should be CSS variable driven but backgrounds do support gradients / fading</li>
+			<li>Tag for bar, for row, for app talking to the endpoint</li>
+			<li>Alt / title type of accessibility area to indicate to non-sighted user what's going on here. "A bar graph animation showing how long it takes for X to be installed" or some kind of equivalent statement</li>
+			<li>Only start loading when visible (need to use intersection observers to ensure that it's visible when someone gets to it)</li>
+			<li>Accessibility enhancement -- if user has Prefers reduced motion, still only load when visible but jump from 0 to 50% to 100% -- https://web.dev/prefers-reduced-motion/</li>
+			<li>Mobile support that's scaled down / responses well</li>
+		</ul>
+	</div>
         <div class="loading-wrapper">
   <div class="loading-name">Bar One</div>
   <div class="loading-bar">
@@ -242,9 +257,9 @@ class LoadingBar extends LitElement {
   }
 
   firstUpdated() {
-    const progressBars = document.querySelectorAll('.progress');
-const timers = document.querySelectorAll('.timer');
-const progressTimes = [37900, 54250, 100000];
+    const progressBars = this.shadowRoot.querySelectorAll('.progress');
+    const timers = this.shadowRoot.querySelectorAll('.timer');
+    const progressTimes = [37900, 54250, 100000];
 
 function updateTime(elapsedTime, timerElement) {
   const seconds = Math.floor(elapsedTime / 1000);
@@ -318,3 +333,6 @@ progressBars.forEach((progressBar) => {
 }
 
 customElements.define('loading-bar', LoadingBar);
+  
+  
+  
