@@ -142,6 +142,22 @@ class LoadingBar extends LitElement {
     width: 100%;
   }
 }
+
+.in-view .progress {
+  animation-play-state: running;
+}
+
+@media (max-width: 767px) {
+  .loading-wrapper .progress {
+    animation: progress 100s linear forwards;
+    animation-delay: 1s;
+    animation-play-state: paused;
+  }
+
+  .loading-wrapper .progress.in-view {
+    animation-play-state: running;
+  }
+}
   `;
 
   constructor() {
@@ -260,76 +276,79 @@ class LoadingBar extends LitElement {
     const progressBars = this.shadowRoot.querySelectorAll('.progress');
     const timers = this.shadowRoot.querySelectorAll('.timer');
     const progressTimes = [37900, 54250, 100000];
-
-function updateTime(elapsedTime, timerElement) {
-  const seconds = Math.floor(elapsedTime / 1000);
-  const milliseconds = Math.floor((elapsedTime % 1000) / 10);
-  timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
-}
-
-function updateTimer(progressBar, timer, progressTime) {
-  let startTime = Date.now();
-  let elapsedTime = 0;
-  let timerInterval;
-
-
-  function step() {
-    const currentTime = Date.now();
-    elapsedTime = currentTime - startTime;
-
-    if (elapsedTime >= progressTime) {
-      elapsedTime = progressTime;
-      clearInterval(timerInterval);
+  
+    function updateTime(elapsedTime, timerElement) {
+      const seconds = Math.floor(elapsedTime / 1000);
+      const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+      timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
     }
-
-    updateTime(elapsedTime, timer);
-    const percentage = elapsedTime / progressTime * 100;
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      
-      if (percentage >= 50) {
-        progressBar.style.width = '50%';
+  
+    function updateTimer(progressBar, timer, progressTime) {
+      let startTime = Date.now();
+      let elapsedTime = 0;
+      let timerInterval;
+  
+      function step() {
+        const currentTime = Date.now();
+        elapsedTime = currentTime - startTime;
+  
+        if (elapsedTime >= progressTime) {
+          elapsedTime = progressTime;
+          clearInterval(timerInterval);
+        }
+  
+        updateTime(elapsedTime, timer);
+        const percentage = elapsedTime / progressTime * 100;
+  
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  
+          if (percentage >= 50) {
+            progressBar.style.width = '50%';
+          }
+          if (percentage >= 100) {
+            progressBar.style.width = '100%';
+          }
+        } else {
+          // Reduce motion is disabled
+          progressBar.style.width = percentage + '%';
+        }
       }
-      if (percentage >= 100) {
-        progressBar.style.width = '100%';
-      }
-    } else {
-      // Reduce motion is disabled
-      progressBar.style.width = percentage + '%';
+  
+      timerInterval = setInterval(step, 10);
     }
+  
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1,
+    };
+  
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const progressBar = entry.target.querySelector('.loading-bar .progress');
+          const timer = entry.target.querySelector('.timer');
+          const progressTime = progressTimes[Array.from(progressBars).indexOf(progressBar)];
+  
+          setTimeout(() => {
+            progressBar.style.animationPlayState = 'paused';
+          }, progressTime);
+  
+          updateTimer(progressBar, timer, progressTime);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+  
+    const loadingWrappers = this.shadowRoot.querySelectorAll('.loading-wrapper');
+  
+    loadingWrappers.forEach((loadingWrapper) => {
+      observer.observe(loadingWrapper);
+    });
   }
-
-  timerInterval = setInterval(step, 10);
-}
-
-const observerOptions = {
-  root: null,
-  rootMargin: '0px',
-  threshold: 0.1,
-};
-
-const observer = new IntersectionObserver((entries, observer) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      const progressBar = entry.target.querySelector('.progress');
-      const timer = entry.target.querySelector('.timer');
-      const progressTime = progressTimes[Array.from(progressBars).indexOf(progressBar)];
-      
-      setTimeout(() => {
-        progressBar.style.animationPlayState = 'paused';
-      }, progressTime);
-
-      updateTimer(progressBar, timer, progressTime);
-      observer.unobserve(entry.target);
-    }
-  });
-}, observerOptions);
-
-progressBars.forEach((progressBar) => {
-  observer.observe(progressBar.parentNode);
-});
-
-  }
+  
+  
+  
 }
 
 customElements.define('loading-bar', LoadingBar);
