@@ -151,7 +151,7 @@ class LoadingBar extends LitElement {
   .loading-wrapper .progress {
     animation: progress 100s linear forwards;
     animation-delay: 1s;
-    animation-play-state: paused;
+    animation-play-state: paused !important;
   }
 
   .loading-wrapper .progress.in-view {
@@ -247,108 +247,116 @@ class LoadingBar extends LitElement {
 			<li>Mobile support that's scaled down / responses well</li>
 		</ul>
 	</div>
-        <div class="loading-wrapper">
-  <div class="loading-name">Bar One</div>
+       <div class="loading-wrapper">
+  <div class="loading-name" aria-label="Loading Bar One">Bar One</div>
   <div class="loading-bar">
     <div class="progress"></div>
-    <div class="timer">0s</div>
+    <div class="timer" aria-label="37.900 seconds lasing time">0s</div>
   </div>
 </div>
 <div class="loading-wrapper">
-  <div class="loading-name">Bar Two</div>
+  <div class="loading-name" aria-label="Loading Bar Two">Bar Two</div>
   <div class="loading-bar">
     <div class="progress"></div>
-    <div class="timer">0s</div>
+    <div class="timer" aria-label="54.250 seconds loading time">0s</div>
   </div>
 </div>
 <div class="loading-wrapper">
-  <div class="loading-name">Bar Three</div>
+  <div class="loading-name" aria-label="Loading Bar Three">Bar Three</div>
   <div class="loading-bar">
     <div class="progress"></div>
-    <div class="timer">0s</div>
+    <div class="timer" aria-label="100 seconds loading time">0s</div>
   </div>
 </div>
+
       </main>
     `;
   }
 
-  firstUpdated() {
-    const progressBars = this.shadowRoot.querySelectorAll('.progress');
-    const timers = this.shadowRoot.querySelectorAll('.timer');
-    const progressTimes = [37900, 54250, 100000];
-  
-    function updateTime(elapsedTime, timerElement) {
-      const seconds = Math.floor(elapsedTime / 1000);
-      const milliseconds = Math.floor((elapsedTime % 1000) / 10);
-      timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
-    }
-  
-    function updateTimer(progressBar, timer, progressTime) {
-      let startTime = Date.now();
-      let elapsedTime = 0;
-      let timerInterval;
-  
-      function step() {
-        const currentTime = Date.now();
-        elapsedTime = currentTime - startTime;
-  
-        if (elapsedTime >= progressTime) {
-          elapsedTime = progressTime;
-          clearInterval(timerInterval);
-        }
-  
-        updateTime(elapsedTime, timer);
-        const percentage = elapsedTime / progressTime * 100;
-  
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  
-          if (percentage >= 50) {
-            progressBar.style.width = '50%';
-          }
-          if (percentage >= 100) {
-            progressBar.style.width = '100%';
-          }
-        } else {
-          // Reduce motion is disabled
-          progressBar.style.width = percentage + '%';
-        }
-      }
-  
-      timerInterval = setInterval(step, 10);
-    }
-  
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1,
-    };
-  
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const progressBar = entry.target.querySelector('.loading-bar .progress');
-          const timer = entry.target.querySelector('.timer');
-          const progressTime = progressTimes[Array.from(progressBars).indexOf(progressBar)];
-  
-          setTimeout(() => {
-            progressBar.style.animationPlayState = 'paused';
-          }, progressTime);
-  
-          updateTimer(progressBar, timer, progressTime);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-  
-    const loadingWrappers = this.shadowRoot.querySelectorAll('.loading-wrapper');
-  
-    loadingWrappers.forEach((loadingWrapper) => {
-      observer.observe(loadingWrapper);
-    });
+firstUpdated() {
+  const progressBars = this.shadowRoot.querySelectorAll('.progress');
+  const timers = this.shadowRoot.querySelectorAll('.timer');
+  const progressTimes = [37900, 54250, 100000];
+
+  function updateTime(elapsedTime, timerElement) {
+    const seconds = Math.floor(elapsedTime / 1000);
+    const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+    timerElement.innerText = `${seconds}.${milliseconds.toString().padStart(2, '0')}s`;
   }
-  
-  
-  
+
+function updateTimer(progressBar, timer, progressTime) {
+  let startTime = Date.now();
+  let elapsedTime = 0;
+  let timerInterval;
+
+  function step() {
+    const currentTime = Date.now();
+    elapsedTime = currentTime - startTime;
+
+    if (elapsedTime >= progressTime) {
+      elapsedTime = progressTime;
+      clearInterval(timerInterval);
+    }
+
+    updateTime(elapsedTime, timer);
+    const percentage = elapsedTime / progressTime * 100;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+
+      if (percentage >= 50) {
+        progressBar.style.width = '50%';
+      }
+      if (percentage >= 100) {
+        progressBar.style.width = '100%';
+      }
+    } else {
+      // Reduce motion is disabled
+      progressBar.style.width = percentage + '%';
+    }
+
+    if (elapsedTime >= progressTime) {
+      progressBar.style.animationPlayState = 'paused';
+    }
+  }
+
+  timerInterval = setInterval(step, 10);
+  return timerInterval;
+}
+
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1,
+  };
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const progressBar = entry.target.querySelector('.loading-bar .progress');
+        const timer = entry.target.querySelector('.timer');
+        const progressTime = progressTimes[Array.from(progressBars).indexOf(progressBar)];
+
+        progressBar.style.animationPlayState = 'running';
+        const timerInterval = updateTimer(progressBar, timer, progressTime);
+
+        entry.target.dataset.timerInterval = timerInterval;
+        observer.unobserve(entry.target);
+      } else {
+        const progressBar = entry.target.querySelector('.loading-bar .progress');
+        progressBar.style.animationPlayState = 'paused';
+
+        clearInterval(entry.target.dataset.timerInterval);
+      }
+    });
+  }, observerOptions);
+
+  const loadingWrappers = this.shadowRoot.querySelectorAll('.loading-wrapper');
+
+  loadingWrappers.forEach((loadingWrapper) => {
+    observer.observe(loadingWrapper);
+  });
+}
+
 }
 
 customElements.define('loading-bar', LoadingBar);
